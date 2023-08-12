@@ -156,7 +156,7 @@ void packet_relay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, co
 		recv_packet->icmp_.type_ = 8;
 		recv_packet->ip_.tot_len_ = htons(sizeof(IpHdr) + sizeof(IcmpHdr)); 
 
-    // 패킷의 실제 크기를 계산
+    
     		int packet_size = sizeof(EthHdr) + ntohs(recv_packet->ip_.tot_len_);
 
     		int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), packet_size);	

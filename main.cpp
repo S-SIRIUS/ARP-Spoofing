@@ -135,43 +135,4 @@ int main(int argc, char* argv[]) {
 	free(my_mac);
 	pcap_close(handle);
 }
-/*
-int main(int argc, char* argv[]) {
-    if (argc < 4 || argc %2 != 0) {
-        fprintf(stderr, "Invalid number of arguments\n");
-        usage();
-        return -1;
-    }
 
-    char* dev = argv[1];
-    char errbuf[PCAP_ERRBUF_SIZE];
-
-    char * my_mac = getMac(argv[1]);
-    printf("MY MAC %s\n", my_mac);
-
-    std::vector<std::thread> threads;
-
-    int i=2;
-    for(i=2; i<argc; i+=2) {
-        pcap_t* session_handle = pcap_open_live(dev, BUFSIZ, 1, 1, errbuf);
-        if (session_handle == nullptr) {
-            fprintf(stderr, "couldn't open device %s(%s)\n", dev, errbuf);
-            return -1;
-        }
-
-        Mac sender_mac = send_arp(session_handle, my_mac, "192.168.0.106", argv[i]);
-        Mac target_mac = send_arp(session_handle, my_mac,  "192.168.0.106", argv[i+1]);
-        arp_attack(session_handle, Mac(my_mac), sender_mac, argv[i], argv[i+1]);
-
-        threads.emplace_back(packet_relay, session_handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
-        threads.emplace_back(recover_check, session_handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
-    }
-
-    for(auto& th : threads) {
-        th.join();
-    }
-
-    free(my_mac);
-     // You should close each session_handle after its threads have finished. This is just an example.
-}
-*/
