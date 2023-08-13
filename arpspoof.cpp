@@ -103,7 +103,7 @@ void packet_relay(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, con
             		printf("I got sender's packet\n");
                         recv_packet->eth_.smac_ = my_mac;
                         recv_packet->eth_.dmac_ = target_mac;  
-                int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), 74);
+                int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), header->len);
                 if (res != 0) {
                         fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
                  }
@@ -115,7 +115,7 @@ void packet_relay(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, con
                 	recv_packet->eth_.smac_ = my_mac;
                 	recv_packet->eth_.dmac_ = sender_mac;
 
-                int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), 74);
+                int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), header->len);
                 if (res != 0) {
                     fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
                 }
