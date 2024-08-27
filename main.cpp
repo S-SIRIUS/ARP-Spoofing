@@ -3,11 +3,11 @@
 #include <stdlib.h>         // 메모리 할당 및 프로세스 제어 함수
 #include <string.h>         // 문자열 관련 함수
 #include <thread>           // C++ 표준 스레드 라이브러리 (std::thread 사용)
+#include <iostream>			// std::cout
+
 
 #include "utils.h"
 #include "extract.h"
-
-
 
 int main(int argc, char* argv[]) {
 	
@@ -25,14 +25,27 @@ int main(int argc, char* argv[]) {
 	
 	// 자신의 맥주소(Attacker) 추출
 	char * my_mac = getAttackerMac(argv[1]);
-	printf("MY MAC %s\n", my_mac);
+	printf("My MAC: %s\n", my_mac);
 	
-    /*
-	int i=2;
-	for(i=2; i<argc; i+=2){
-    	
-        Mac sender_mac = send_arp(handle, my_mac, "192.168.0.106", argv[i]);
-		Mac target_mac = send_arp(handle, my_mac,  "192.168.0.106", argv[i+1]);	
+	// 자신의 IP주소(Attacker) 추출
+
+	char * my_ip = getAttackerIP(argv[1]);
+	printf("My IP: %s\n", my_ip);
+
+	for(int i=2; i<argc; i+=2){
+
+		// Sender Mac주소 출력
+        Mac sender_mac = sendArp(handle, my_mac, my_ip, argv[i]);
+		std::cout << "Sender MAC: ";
+		sender_mac.printMac();
+
+		//Target Mac주소 출력
+		Mac target_mac = sendArp(handle, my_mac, my_ip, argv[i+1]);
+		std::cout << "Target MAC: ";
+		target_mac.printMac();
+		
+
+		/*	
 		arp_attack(handle, Mac(my_mac),sender_mac, argv[i], argv[i+1]); 		
 		std::thread relay_thread(packet_relay, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
         std::thread recover_thread(recover_check, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
@@ -40,8 +53,9 @@ int main(int argc, char* argv[]) {
 		relay_thread.join();
 		
 		recover_thread.join();
+		*/
 		}
-	*/
+
     free(my_mac);
 	pcap_close(handle);
 }

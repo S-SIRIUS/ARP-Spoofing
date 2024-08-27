@@ -14,6 +14,7 @@ int argcValidate(int argc){
 		usage();
 		return -1;
 	}
+	return 0;
 }
 
 // 인터페이스 오류 검증
@@ -22,5 +23,6 @@ int handlerValidate(pcap_t * handle, char* dev, char * errbuf){
 		fprintf(stderr, "couldn't open device %s(%s)\n", dev, errbuf);
 		return -1;
         }
+	return 0;
 
 }

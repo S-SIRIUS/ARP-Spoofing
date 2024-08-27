@@ -2,6 +2,7 @@
 #include "arphdr.h"
 #include "mac.h"
 #include "ip.h"
+#include <pcap.h>
 
 #pragma pack(push, 1)
 struct EthArpPacket final {
@@ -11,4 +12,5 @@ struct EthArpPacket final {
 #pragma pack(pop)
 
 char* getAttackerMac(const char* iface);
-Mac send_arp(pcap_t *handle, const char* my_mac, const char* attacker_ip, const char* sender_ip);
+char* getAttackerIP(const char* iface);
+Mac sendArp(pcap_t *handle, const char* my_mac, const char* attacker_ip, const char* sender_ip);
