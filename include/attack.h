@@ -17,10 +17,8 @@
 #include "ethhdr.h"
 #include "arphdr.h"
 #include <thread>
-#include "arpspoof.h"
 
-void arp_attack(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip);
-
+void arpAttack(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip);
 void recover_check(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip);
 void packet_relay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip);
 

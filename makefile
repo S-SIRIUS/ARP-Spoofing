@@ -11,9 +11,11 @@ mac.o: include/mac.h mac.cpp
 
 ip.o: include/ip.h ip.cpp
 
+attack.o: include/attack.h attack.cpp 
+
 main.o: include/utils.h include/extract.h main.cpp
 
-arp-spoof: main.o utils.o extract.o ip.o mac.o
+arp-spoof: main.o utils.o extract.o ip.o mac.o attack.o
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 clean:

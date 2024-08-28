@@ -9,7 +9,7 @@ void usage() {
 
 // 명령어 인자가 4보다 작거나 홀수인지 검증
 int argcValidate(int argc){ 
-    if (argc < 4 || argc %2 != 0) {
+    if (argc < 6 || argc %2 != 0) {
 		fprintf(stderr, "Invalid number of arguments\n");
 		usage();
 		return -1;

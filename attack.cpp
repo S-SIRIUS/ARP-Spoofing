@@ -1,21 +1,11 @@
 
-#include "arpspoof.h"
 #include <cstdio>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
-#include <cstring>
-#include <iomanip>
 #include <iostream>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <pcap.h>
-#include "ethhdr.h"
-#include "arphdr.h"
-#include <thread>
+#include "etharp.h"
+
 struct IpHdr {
     uint8_t v_:4;           // version
     uint8_t hdr_len_:4;     // header_length
@@ -45,23 +35,14 @@ struct IcmpHdr {
 };
 
 #pragma pack(push, 1)
-struct EthArpPacket final {
-        EthHdr eth_;
-        ArpHdr arp_;
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
 struct EthIpPacket final{
         EthHdr eth_;
         IpHdr ip_;
 	IcmpHdr icmp_; 
 };
 
-void arp_attack(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
+void arpAttack(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
 {
-
-
         EthArpPacket packet;
 
         packet.eth_.dmac_ = sender_mac;
@@ -82,11 +63,9 @@ void arp_attack(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_i
         if (res != 0) {
                 fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
         }
-
-
 }
 
-
+/*
 void packet_relay(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
 {
         struct pcap_pkthdr *header;
@@ -275,7 +254,7 @@ void packet_relay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, co
         }
     }
 }
-*/
+
 void recover_check(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
 {
         struct pcap_pkthdr *header;
@@ -334,3 +313,4 @@ void recover_check(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, co
         
 }
 
+*/

