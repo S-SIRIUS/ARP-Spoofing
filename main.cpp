@@ -49,8 +49,8 @@ int main(int argc, char* argv[]) {
 	std::cout << "Target MAC: ";
 	target_mac.printMac();
 		
-	arpAttack(handle, Mac(my_mac),sender_mac, argv[2], argv[3]); //sender: A, target: B
-	arpAttack(handle, Mac(my_mac), target_mac, argv[4], argv[5]);//semder: B, target: A
+	arpInfect(handle, Mac(my_mac),sender_mac, argv[2], argv[3]); //sender: A, target: B
+	arpInfect(handle, Mac(my_mac), target_mac, argv[4], argv[5]);//semder: B, target: A
 
 	
 	std::thread relay_thread(packetRelay, handle, Mac(my_mac), target_mac, sender_mac, argv[2], argv[3]);
