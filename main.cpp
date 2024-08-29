@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
 	
 	// 사용자가 입력한 명령어 검증
 	argcValidate(argc);
+	argvValidate(argv);
 	
 	// 사용자가 입력한 인터페이스
 	char* dev = argv[1];
@@ -32,27 +33,26 @@ int main(int argc, char* argv[]) {
 	char * my_ip = getAttackerIP(argv[1]);
 	printf("My IP: %s\n", my_ip);
 
-	for(int i=2; i<argc; i+=2){
-		// Sender Mac주소 출력
-        Mac sender_mac = sendArp(handle, my_mac, my_ip, argv[i]);
-		std::cout << "Sender MAC: ";
-		sender_mac.printMac();
 
-		//Target Mac주소 출력
-		Mac target_mac = sendArp(handle, my_mac, my_ip, argv[i+1]);
-		std::cout << "Target MAC: ";
-		target_mac.printMac();
+	// Sender Mac주소 출력
+    Mac sender_mac = sendArp(handle, my_mac, my_ip, argv[2]);
+	std::cout << "Sender MAC: ";
+	sender_mac.printMac();
+
+	//Target Mac주소 출력
+	Mac target_mac = sendArp(handle, my_mac, my_ip, argv[3]);
+	std::cout << "Target MAC: ";
+	target_mac.printMac();
 		
-		arpAttack(handle, Mac(my_mac),sender_mac, argv[i], argv[i+1]);
-		/* 		
-		std::thread relay_thread(packet_relay, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
-        std::thread recover_thread(recover_check, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
+	arpAttack(handle, Mac(my_mac),sender_mac, argv[2], argv[3]); //sender: A, target: B
+	arpAttack(handle, Mac(my_mac), target_mac, argv[4], argv[5]);//semder: B, target: A
+
+	
+	std::thread relay_thread(packetRelay, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
+    //std::thread recover_thread(recover_check, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
 		
-		relay_thread.join();
-		
-		recover_thread.join();
-		*/
-		}
+	relay_thread.join();
+	// recover_thread.join();
 
     free(my_mac);
 	pcap_close(handle);

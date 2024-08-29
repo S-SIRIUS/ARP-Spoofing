@@ -65,8 +65,8 @@ void arpAttack(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip
         }
 }
 
-/*
-void packet_relay(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
+
+void packetRelay(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
 {
         struct pcap_pkthdr *header;
         const u_char *response;
