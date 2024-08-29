@@ -53,11 +53,11 @@ int main(int argc, char* argv[]) {
 	arpInfect(handle, Mac(my_mac), target_mac, argv[4], argv[5]);//semder: B, target: A
 
 	
-	std::thread relay_thread(packetRelay, handle, Mac(my_mac), target_mac, sender_mac, argv[2], argv[3]);
-    //std::thread recover_thread(recover_check, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
+	std::thread relay_thread(packetRelay, handle, Mac(my_mac), sender_mac, target_mac, argv[2], argv[3]);
+    std::thread reInfect_thread(recoveryCheck, handle, Mac(my_mac), sender_mac, target_mac);
 		
 	relay_thread.join();
-	// recover_thread.join();
+	reInfect_thread.join();
 
     free(my_mac);
 	pcap_close(handle);

