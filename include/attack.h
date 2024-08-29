@@ -17,6 +17,6 @@
 
 void arpInfect(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip);
 void packetRelay(pcap_t *handle, Mac my_mac, Mac sender_mac, Mac target_mac, const char* sender_ip, const char* target_ip);
-void recoveryCheck(pcap_t *handle, Mac my_mac, Mac sender_mac, Mac target_mac);
+void recoveryCheck(pcap_t *handle, Mac my_mac, Mac sender_mac, Mac target_mac, const char* sender_ip, const char* target_ip);
 
 

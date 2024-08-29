@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 
 	
 	std::thread relay_thread(packetRelay, handle, Mac(my_mac), sender_mac, target_mac, argv[2], argv[3]);
-    std::thread reInfect_thread(recoveryCheck, handle, Mac(my_mac), sender_mac, target_mac);
+    std::thread reInfect_thread(recoveryCheck, handle, Mac(my_mac), sender_mac, target_mac, argv[2], argv[3]);
 		
 	relay_thread.join();
 	reInfect_thread.join();
