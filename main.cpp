@@ -13,8 +13,12 @@
 int main(int argc, char* argv[]) {
 	
 	// 사용자가 입력한 명령어 검증
-	argcValidate(argc);
-	argvValidate(argv);
+	if (argcValidate(argc) != 0) {
+		exit(EXIT_FAILURE);  // Exit if validation fails
+	}
+	if (argvValidate(argv) != 0) {
+		exit(EXIT_FAILURE);  // Exit if validation fails
+	}
 	
 	// 사용자가 입력한 인터페이스
 	char* dev = argv[1];
@@ -48,10 +52,10 @@ int main(int argc, char* argv[]) {
 	arpAttack(handle, Mac(my_mac), target_mac, argv[4], argv[5]);//semder: B, target: A
 
 	
-	std::thread relay_thread(packetRelay, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
+	//std::thread relay_thread(packetRelay, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
     //std::thread recover_thread(recover_check, handle, Mac(my_mac), target_mac, sender_mac, argv[i], argv[i+1]);
 		
-	relay_thread.join();
+	//relay_thread.join();
 	// recover_thread.join();
 
     free(my_mac);

@@ -9,7 +9,7 @@ void usage() {
 
 // 명령어 인자가 4보다 작거나 홀수인지 검증
 int argcValidate(int argc){ 
-    if (argc < 6 || argc %2 != 0) {
+    if (argc < 4 || argc %2 != 0) {
 		fprintf(stderr, "Invalid number of arguments\n");
 		usage();
 		return -1;
@@ -20,7 +20,7 @@ int argcValidate(int argc){
 //명령어 인자의 argv[2] = argv[5], argv[3] = argv[4] 인지 검증
 int argvValidate(char* argv[]){ 
     if ((argv[2] != argv[5]) || (argv[3] != argv[4])) {
-		fprintf(stderr, "Invalid Pair of Ip address\n");
+		fprintf(stderr, "Invalid pair of IP addresses\n");
 		usage();
 		return -1;
 	}
