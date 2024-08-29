@@ -1,4 +1,3 @@
-
 #include <cstdio>
 #include <stdlib.h>
 #include <string.h>
@@ -6,41 +5,7 @@
 #include <pcap.h>
 #include "etharp.h"
 #include <ctime> // 시간 처리를 위한 헤더
-
-struct IpHdr {
-    uint8_t v_:4;           // version
-    uint8_t hdr_len_:4;     // header_length
-    uint8_t tos_val_;
-
-    uint16_t tot_len_;      // total_length
-    uint16_t id_val_;       // identification
-    
-    uint8_t flags_val_:3;
-    uint16_t frag_offset_:13;
-
-    uint8_t ttl_val_;
-    uint8_t protocol_val_;
-    uint16_t checksum_val_;
-    
-    Ip src_ip_;             // sip
-    Ip dest_ip_;            // dip
-};
-
-struct IcmpHdr {
-    uint8_t type_;
-    uint8_t code_;
-    uint16_t check_;
-    uint16_t id_;
-    uint16_t seq_;
-
-};
-
-#pragma pack(push, 1)
-struct EthIpPacket final{
-        EthHdr eth_;
-        IpHdr ip_;
-	IcmpHdr icmp_; 
-};
+#include "ethip.h"
 
 // ARP 요청(감염) 보내는 function
 void arpInfect(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)
@@ -127,7 +92,7 @@ void recoveryCheck(pcap_t *handle, Mac my_mac, Mac sender_mac, Mac target_mac, c
     struct pcap_pkthdr *header;
     const u_char *response;
     time_t last_infect_time = time(nullptr); // 마지막 감염 시각 초기화
-    const int infect_interval = 10; // 재감염 주기 (초 단위)
+    const int infect_interval = 5; // 재감염 주기 (초 단위)
 
     while (true) {
         int pcap_next_res = pcap_next_ex(handle, &header, &response);
