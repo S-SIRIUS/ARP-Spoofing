@@ -11,7 +11,8 @@
 
 * Mac주소 뒷자리 3바이트는 생략
 
-![ARP-Spoofing](https://github.com/user-attachments/assets/4a8a0071-071e-4624-b9a8-163718dabeb7)
+![ARP-Spoofing](https://github.com/user-attachments/assets/91600056-4b06-4b17-9561-0b4f28745879)
+
 
 
 > Sender와 Target의 ARP 테이블이 모두 Attacker의 Mac주소로 감염이 되어 있는 상태이다.
@@ -25,9 +26,9 @@
 ## Demonstration
 | **Host**    | **IP Address**  | **MAC Address** |
 |-------------|-----------------|-----------------|
-| Sender      | 192.168.0.108   | 60-DD-8E        |
+| Sender      | 192.168.0.108   | 0C-54-15        |
 | Attacker    | 192.168.0.107   | 58-1C-F8        |
-| Target      | 192.168.0.105   | C8-3A-35        |
+| Target      | 192.168.0.105   | 60-DD-8E        |
 
 > Sender(192.168.0.108)이 Target(192.168.0.105)로 ICMP 패킷을 보내는 상황
 
@@ -38,6 +39,7 @@
 ![Sender PNG](https://github.com/user-attachments/assets/e1a62e2b-a7ca-45b9-bdbb-2b301b882ba2)
 
 > Sender의 ARP 테이블은 Attacker의 Mac주소(58-1C-F8)로 감염이 되어 있는 상태이다.
+> 
 > 이때 Ping 명령어로 ICMP 패킷을 Target(192.168.0.105)로 보낸다.
 
 ### 2) Attacker
