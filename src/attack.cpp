@@ -3,9 +3,10 @@
 #include <string.h>
 #include <iostream>
 #include <pcap.h>
-#include "etharp.h"
 #include <ctime> // 시간 처리를 위한 헤더
-#include "ethip.h"
+
+#include "protocols/etharp.h"
+#include "protocols/ethip.h"
 
 // ARP 요청(감염) 보내는 function
 void arpInfect(pcap_t *handle, Mac my_mac, Mac sender_mac, const char* sender_ip, const char* target_ip)

@@ -1,4 +1,4 @@
-#include "mac.h"
+#include "protocols/mac.h"
 
 Mac::Mac(const std::string& r) {
 	std::string s;

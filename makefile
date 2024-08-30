@@ -1,35 +1,31 @@
-# 라이브러리와 컴파일 플래그 설정
 LDLIBS = -lpcap
-CXXFLAGS = -Iinclude  # include 디렉토리를 헤더 파일 경로로 추가
+CXXFLAGS = -Iinclude
 
-# 소스 및 객체 파일 경로 설정
-SRC_DIR = src         # 소스 파일이 있는 디렉토리
-OBJ_DIR = obj         # 객체 파일을 저장할 디렉토리
-INCLUDE_DIR = include # 헤더 파일이 있는 디렉토리
+all: arp-spoof
 
-# 소스 파일 목록
-SOURCES = $(SRC_DIR)/utils.cpp $(SRC_DIR)/extract.cpp $(SRC_DIR)/mac.cpp \
-          $(SRC_DIR)/ip.cpp $(SRC_DIR)/attack.cpp $(SRC_DIR)/main.cpp
+src/utils.o: include/utils/utils.h src/utils.cpp
+	$(CXX) $(CXXFLAGS) -c src/utils.cpp -o src/utils.o
 
-# 객체 파일 목록
-OBJECTS = $(SRC_DIR)/utils.o $(SRC_DIR)/extract.o $(SRC_DIR)/mac.o \
-          $(SRC_DIR)/ip.o $(SRC_DIR)/attack.o $(SRC_DIR)/main.o
+src/extract.o: include/spoof/extract.h src/extract.cpp
+	$(CXX) $(CXXFLAGS) -c src/extract.cpp -o src/extract.o
 
-# 최종 실행 파일 이름
-TARGET = arp-spoof
+src/mac.o: include/protocols/mac.h src/mac.cpp
+	$(CXX) $(CXXFLAGS) -c src/mac.cpp -o src/mac.o
 
-# 기본 빌드 규칙
-all: $(TARGET)
+src/ip.o: include/protocols/ip.h src/ip.cpp
+	$(CXX) $(CXXFLAGS) -c src/ip.cpp -o src/ip.o
 
-# 객체 파일 빌드 규칙
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+src/attack.o: include/spoof/attack.h src/attack.cpp
+	$(CXX) $(CXXFLAGS) -c src/attack.cpp -o src/attack.o
 
-# 최종 실행 파일 빌드 규칙
-$(TARGET): $(OBJECTS)
+src/main.o: include/utils/utils.h include/spoof/extract.h src/main.cpp
+	$(CXX) $(CXXFLAGS) -c src/main.cpp -o src/main.o
+
+arp-spoof: src/main.o src/utils.o src/extract.o src/ip.o src/mac.o src/attack.o
 	$(CXX) $^ $(LDLIBS) -o $@
 
-# 클린 규칙
 clean:
-	rm -f $(OBJ_DIR)/*.o $(TARGET)
+	rm -f arp-spoof src/*.o
+
+
 

@@ -6,9 +6,9 @@
 #include <iostream>			// std::cout
 
 
-#include "utils.h"
-#include "extract.h"
-#include "attack.h"
+#include "utils/utils.h"
+#include "spoof/extract.h"
+#include "spoof/attack.h"
 
 int main(int argc, char* argv[]) {
 	
