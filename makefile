@@ -3,7 +3,7 @@ CXXFLAGS=-Iinclude  # include 디렉토리를 헤더 파일 경로로 추가
 
 all: arp-spoof
 
-utils.o: include/utils.h utils.cpp
+utils.o: include/utils.h src/utils.cpp
 
 extract.o: include/extract.h extract.cpp
 
