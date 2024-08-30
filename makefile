@@ -1,23 +1,35 @@
-LDLIBS=-lpcap
-CXXFLAGS=-Iinclude  # include 디렉토리를 헤더 파일 경로로 추가
+# 라이브러리와 컴파일 플래그 설정
+LDLIBS = -lpcap
+CXXFLAGS = -Iinclude  # include 디렉토리를 헤더 파일 경로로 추가
 
-all: arp-spoof
+# 소스 및 객체 파일 경로 설정
+SRC_DIR = src         # 소스 파일이 있는 디렉토리
+OBJ_DIR = obj         # 객체 파일을 저장할 디렉토리
+INCLUDE_DIR = include # 헤더 파일이 있는 디렉토리
 
-utils.o: include/utils.h src/utils.cpp
+# 소스 파일 목록
+SOURCES = $(SRC_DIR)/utils.cpp $(SRC_DIR)/extract.cpp $(SRC_DIR)/mac.cpp \
+          $(SRC_DIR)/ip.cpp $(SRC_DIR)/attack.cpp $(SRC_DIR)/main.cpp
 
-extract.o: include/extract.h extract.cpp
+# 객체 파일 목록
+OBJECTS = $(SRC_DIR)/utils.o $(SRC_DIR)/extract.o $(SRC_DIR)/mac.o \
+          $(SRC_DIR)/ip.o $(SRC_DIR)/attack.o $(SRC_DIR)/main.o
 
-mac.o: include/mac.h mac.cpp
+# 최종 실행 파일 이름
+TARGET = arp-spoof
 
-ip.o: include/ip.h ip.cpp
+# 기본 빌드 규칙
+all: $(TARGET)
 
-attack.o: include/attack.h attack.cpp 
+# 객체 파일 빌드 규칙
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-main.o: include/utils.h include/extract.h main.cpp
+# 최종 실행 파일 빌드 규칙
+$(TARGET): $(OBJECTS)
+	$(CXX) $^ $(LDLIBS) -o $@
 
-arp-spoof: main.o utils.o extract.o ip.o mac.o attack.o
-	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
-
+# 클린 규칙
 clean:
-	rm -f arp-spoof *.o
+	rm -f $(OBJ_DIR)/*.o $(TARGET)
 
