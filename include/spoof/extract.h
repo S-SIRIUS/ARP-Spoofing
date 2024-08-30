@@ -1,4 +1,4 @@
-#include "mac.h"
+#include "protocols/mac.h"
 #include <pcap.h>
 
 char* getAttackerMac(const char* iface);

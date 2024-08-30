@@ -7,12 +7,13 @@
 #include <unistd.h>     // close 함수
 #include <pcap.h>           // pcap 관련 함수들
 
-#include "mac.h"
-#include "ip.h"
-#include "arphdr.h"
-#include "ethhdr.h"
-#include "extract.h"
-#include "etharp.h"
+#include "protocols/mac.h"
+#include "protocols/ip.h"
+#include "protocols/arphdr.h"
+#include "protocols/ethhdr.h"
+#include "protocols/etharp.h"
+#include "spoof/extract.h"
+
 
 // Attacker 맥주소 추출
 char* getAttackerMac(const char* iface)

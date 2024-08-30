@@ -6,9 +6,9 @@
 #include <iostream>			// std::cout
 
 
-#include "utils.h"
-#include "extract.h"
-#include "attack.h"
+#include "utils/utils.h"
+#include "spoof/extract.h"
+#include "spoof/attack.h"
 
 int main(int argc, char* argv[]) {
 	
@@ -16,10 +16,9 @@ int main(int argc, char* argv[]) {
 	if (argcValidate(argc) != 1) {
 		exit(EXIT_FAILURE);  // Exit if validation fails
 	}
-	/*
 	if (argvValidate(argv) != 1) {
 		exit(EXIT_FAILURE);  // Exit if validation fails
-	}*/
+	}
 	
 	// 사용자가 입력한 인터페이스
 	char* dev = argv[1];
